@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UK MindCare Pharmacy - Full Calculator</title>
+    <title>Medicine Calculator</title>
     <style>
         :root {
             --primary: #00d2ff;
@@ -33,9 +33,25 @@
             box-shadow: 0 15px 50px rgba(0,0,0,0.5);
         }
 
-        .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-        h1 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; }
-        .info { font-size: 12px; color: var(--accent); margin-top: 5px; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        h1 { margin: 0; color: var(--primary); font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
+        
+        /* Search Bar Style */
+        .search-container {
+            margin-bottom: 20px;
+        }
+        #searchBar {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--primary);
+            background: #1e293b;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        #searchBar::placeholder { color: #94a3b8; }
 
         .section-title {
             background: rgba(0, 210, 255, 0.1);
@@ -60,6 +76,7 @@
             transition: 0.3s;
         }
 
+        .item-row.hidden { display: none; }
         .item-row:hover { border-color: var(--primary); }
 
         .item-info { font-size: 14px; }
@@ -83,22 +100,11 @@
             background: #111827;
             padding: 20px;
             border-radius: 15px;
-            border: 2px solid var(--primary);
+            border: 2px solid var(--accent);
         }
 
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; }
-        .grand-total { font-size: 24px; color: var(--accent); font-weight: bold; border-top: 1px solid #334155; pt: 10px; }
-
-        select {
-            width: 100%;
-            padding: 12px;
-            background: #0f172a;
-            color: white;
-            border: 1px solid var(--primary);
-            border-radius: 8px;
-            margin-bottom: 15px;
-            cursor: pointer;
-        }
+        .summary-row { display: flex; justify-content: space-between; font-size: 18px; }
+        .grand-total { font-size: 26px; color: var(--accent); font-weight: bold; }
 
         .payment-info { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 15px; }
     </style>
@@ -107,34 +113,22 @@
 
 <div class="container">
     <div class="header">
-        <h1>Uk MindCare Pharmacy</h1>
-        <div class="info">Price Updated: Sept 2026 | Order: 11AM-12PM</div>
+        <h1>CALCULATE</h1>
     </div>
 
-    <label style="font-size: 13px; margin-bottom: 5px; display: block;">Select Shipping Method:</label>
-    <select id="shipping" onchange="calc()">
-        <option value="0">Pickup / No Shipping Selected</option>
-        <option value="10">24 HOUR DELIVERY (£10)</option>
-        <option value="15">1PM GUARANTEED (£15)</option>
-    </select>
+    <div class="search-container">
+        <input type="text" id="searchBar" placeholder="Search medicine..." onkeyup="filterMedicines()">
+    </div>
 
-    <div class="section-title">Category 1: General Items</div>
+    <div id="category1-title" class="section-title">Category 1: General Items</div>
     <div class="item-grid" id="list1"></div>
 
-    <div class="section-title">Category 2: Premium & Others</div>
+    <div id="category2-title" class="section-title">Category 2: Premium & Others</div>
     <div class="item-grid" id="list2"></div>
 
     <div class="sticky-footer">
-        <div class="summary-row">
-            <span>Items Subtotal:</span>
-            <span id="subtotal">£0.00</span>
-        </div>
-        <div class="summary-row">
-            <span>Shipping Charge:</span>
-            <span id="ship-cost">£0.00</span>
-        </div>
         <div class="summary-row grand-total">
-            <span>Grand Total:</span>
+            <span>Total Amount:</span>
             <span id="total">£0.00</span>
         </div>
     </div>
@@ -146,7 +140,6 @@
 </div>
 
 <script>
-    // আপনার দেওয়া সম্পূর্ণ লিস্ট এখানে সেট করা হয়েছে
     const medicines1 = [
         { name: "Ritalin", price: 2.00, note: "" },
         { name: "Easium diaz", price: 0.55, note: "Min: 40pcs" },
@@ -184,6 +177,7 @@
         items.forEach(item => {
             const row = document.createElement('div');
             row.className = 'item-row';
+            row.setAttribute('data-name', item.name.toLowerCase());
             row.innerHTML = `
                 <div class="item-info">
                     ${item.name}
@@ -197,26 +191,35 @@
     }
 
     function calc() {
-        let subtotal = 0;
+        let total = 0;
         const rows = document.querySelectorAll('.item-row');
         
         rows.forEach(row => {
             const qty = parseFloat(row.querySelector('.qty').value) || 0;
             const price = parseFloat(row.querySelector('.qty').getAttribute('data-price'));
             const rowTotal = qty * price;
-            subtotal += rowTotal;
+            total += rowTotal;
             row.querySelector('.item-total').innerText = '£' + rowTotal.toFixed(2);
         });
 
-        const shipping = parseFloat(document.getElementById('shipping').value);
-        const grandTotal = subtotal + shipping;
-
-        document.getElementById('subtotal').innerText = '£' + subtotal.toFixed(2);
-        document.getElementById('ship-cost').innerText = '£' + shipping.toFixed(2);
-        document.getElementById('total').innerText = '£' + grandTotal.toFixed(2);
+        document.getElementById('total').innerText = '£' + total.toFixed(2);
     }
 
-    // Initialize lists
+    // সার্চ ফাংশন
+    function filterMedicines() {
+        const input = document.getElementById('searchBar').value.toLowerCase();
+        const rows = document.querySelectorAll('.item-row');
+        
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name');
+            if (name.includes(input)) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+    }
+
     renderList(medicines1, 'list1');
     renderList(medicines2, 'list2');
 </script>
