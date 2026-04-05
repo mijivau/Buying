@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UK MindCare Pharmacy - Full Calculator</title>
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --accent: #fbbf24;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+        }
+
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        h1 { margin: 0; color: var(--primary); font-size: 22px; text-transform: uppercase; }
+        .info { font-size: 12px; color: var(--accent); margin-top: 5px; }
+
+        .section-title {
+            background: rgba(0, 210, 255, 0.1);
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            font-size: 14px;
+        }
+
+        .item-grid { display: grid; gap: 8px; }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: 0.3s;
+        }
+
+        .item-row:hover { border-color: var(--primary); }
+
+        .item-info { font-size: 14px; }
+        .item-info small { display: block; color: #94a3b8; font-size: 11px; }
+
+        input[type="number"] {
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            width: 70px;
+            text-align: center;
+            outline: none;
+        }
+
+        .item-total { text-align: right; font-weight: bold; color: var(--primary); font-size: 14px; }
+
+        .sticky-footer {
+            margin-top: 30px;
+            background: #111827;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid var(--primary);
+        }
+
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; }
+        .grand-total { font-size: 24px; color: var(--accent); font-weight: bold; border-top: 1px solid #334155; pt: 10px; }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            color: white;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .payment-info { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Uk MindCare Pharmacy</h1>
+        <div class="info">Price Updated: Sept 2026 | Order: 11AM-12PM</div>
+    </div>
+
+    <label style="font-size: 13px; margin-bottom: 5px; display: block;">Select Shipping Method:</label>
+    <select id="shipping" onchange="calc()">
+        <option value="0">Pickup / No Shipping Selected</option>
+        <option value="10">24 HOUR DELIVERY (£10)</option>
+        <option value="15">1PM GUARANTEED (£15)</option>
+    </select>
+
+    <div class="section-title">Category 1: General Items</div>
+    <div class="item-grid" id="list1"></div>
+
+    <div class="section-title">Category 2: Premium & Others</div>
+    <div class="item-grid" id="list2"></div>
+
+    <div class="sticky-footer">
+        <div class="summary-row">
+            <span>Items Subtotal:</span>
+            <span id="subtotal">£0.00</span>
+        </div>
+        <div class="summary-row">
+            <span>Shipping Charge:</span>
+            <span id="ship-cost">£0.00</span>
+        </div>
+        <div class="summary-row grand-total">
+            <span>Grand Total:</span>
+            <span id="total">£0.00</span>
+        </div>
+    </div>
+
+    <div class="payment-info">
+        PAYMENT: BANK AND CRYPTO (Screenshot Required)<br>
+        OFF DAY: SATURDAY, SUNDAY
+    </div>
+</div>
+
+<script>
+    // আপনার দেওয়া সম্পূর্ণ লিস্ট এখানে সেট করা হয়েছে
+    const medicines1 = [
+        { name: "Ritalin", price: 2.00, note: "" },
+        { name: "Easium diaz", price: 0.55, note: "Min: 40pcs" },
+        { name: "Sedil 5mg", price: 0.70, note: "Min: 20pcs" },
+        { name: "Nitraz 5mg", price: 0.55, note: "" },
+        { name: "Alprax 1mg", price: 0.85, note: "" },
+        { name: "Bromazepam", price: 0.60, note: "" },
+        { name: "Alprax 2", price: 1.20, note: "" },
+        { name: "Midazolam", price: 0.80, note: "" },
+        { name: "Pase2", price: 0.85, note: "Min: 15pcs" },
+        { name: "Rivotril", price: 0.90, note: "" },
+        { name: "Benzit", price: 0.55, note: "" },
+        { name: "Clobazam", price: 0.55, note: "" },
+        { name: "Miramind", price: 0.55, note: "" }
+    ];
+
+    const medicines2 = [
+        { name: "Pragabalin", price: 0.55, note: "Min: 15pcs" },
+        { name: "Zopi 10mg", price: 0.50, note: "Min: 14pcs" },
+        { name: "Modafinil", price: 0.55, note: "" },
+        { name: "Co-codamol", price: 0.70, note: "" },
+        { name: "Rlam 1mg", price: 0.60, note: "Min: 15pcs" },
+        { name: "Etizolam", price: 0.80, note: "" },
+        { name: "Valium dows", price: 1.00, note: "" },
+        { name: "Temaz", price: 0.90, note: "Min: 14pcs" },
+        { name: "Ativn loraz", price: 0.90, note: "Min: 30pcs" },
+        { name: "Tapenta 200mg", price: 0.90, note: "" },
+        { name: "Royal 225mg", price: 0.90, note: "" },
+        { name: "Tramadol", price: 0.90, note: "" },
+        { name: "Aspadol 200mg", price: 0.90, note: "" }
+    ];
+
+    function renderList(items, elementId) {
+        const container = document.getElementById(elementId);
+        items.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.innerHTML = `
+                <div class="item-info">
+                    ${item.name}
+                    <small>£${item.price.toFixed(2)} ${item.note ? '| ' + item.note : ''}</small>
+                </div>
+                <input type="number" class="qty" data-price="${item.price}" min="0" placeholder="0" oninput="calc()">
+                <div class="item-total">£0.00</div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    function calc() {
+        let subtotal = 0;
+        const rows = document.querySelectorAll('.item-row');
+        
+        rows.forEach(row => {
+            const qty = parseFloat(row.querySelector('.qty').value) || 0;
+            const price = parseFloat(row.querySelector('.qty').getAttribute('data-price'));
+            const rowTotal = qty * price;
+            subtotal += rowTotal;
+            row.querySelector('.item-total').innerText = '£' + rowTotal.toFixed(2);
+        });
+
+        const shipping = parseFloat(document.getElementById('shipping').value);
+        const grandTotal = subtotal + shipping;
+
+        document.getElementById('subtotal').innerText = '£' + subtotal.toFixed(2);
+        document.getElementById('ship-cost').innerText = '£' + shipping.toFixed(2);
+        document.getElementById('total').innerText = '£' + grandTotal.toFixed(2);
+    }
+
+    // Initialize lists
+    renderList(medicines1, 'list1');
+    renderList(medicines2, 'list2');
+</script>
+
+</body>
+</html>
